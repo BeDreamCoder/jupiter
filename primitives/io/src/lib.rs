@@ -1,38 +1,40 @@
 //! Jupiter primitives - IO Module
-#![deny(missing_docs)]
+#![allow(missing_docs)]
 #![cfg_attr(not(feature = "std"), no_std)]
 use sp_runtime_interface::runtime_interface;
 
-/// ZK-SNARKs runtime interface
-#[runtime_interface]
-pub trait ZkSnarks {
-    /// altbn_128 add
-    fn altbn_128_add(input: &[u8]) -> Option<[u8; 64]> {
-        megaclite::altbn_128::add(input).ok()
-    }
+macro_rules! zk {
+    ($($curve:ident),*) => {
+        /// ZK-SNARKs runtime interface
+        #[runtime_interface]
+        pub trait ZkSnarks {
+            $(
+                paste::item!{
+                    fn [<$curve _add>] () {
+                        megaclite::tests::$curve_add();
+                    }
 
-    /// altbn_128 mul
-    fn altbn_128_mul(input: &[u8]) -> Option<[u8; 64]> {
-        megaclite::altbn_128::mul(input).ok()
-    }
+                    fn [<$curve _mul>] () {
+                        megaclite::tests::$curve_mul();
+                    }
 
-    /// altbn_128 pairing
-    fn altbn_128_pairing(input: &[u8]) -> Option<bool> {
-        megaclite::altbn_128::pairing(input).ok()
-    }
+                    fn [<$curve _pairing_two>]() {
+                        megaclite::tests::$curve_pairing();
+                    }
 
-    /// bls12_381 add
-    fn bls12_381_add(input: &[u8]) -> Option<[u8; 96]> {
-        megaclite::bls12_381::add(input).ok()
-    }
+                    fn [<$curve _pairing_six()>] {
+                        megaclite::tests::$curve_pairing_six();
+                    }
+                }
+            )*
+        }
+    };
+}
 
-    /// bls12_381 mul
-    fn bls12_381_mul(input: &[u8]) -> Option<[u8; 96]> {
-        megaclite::bls12_381::mul(input).ok()
-    }
-
-    /// bls12_381 pairing
-    fn bls12_381_pairing(input: &[u8]) -> Option<bool> {
-        megaclite::bls12_381::pairing(input).ok()
-    }
+zk! {
+    bls12_377,
+    bls12_381,
+    bn254,
+    bw6_761,
+    cp6_782
 }
